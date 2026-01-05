@@ -6,7 +6,7 @@ author: TGO Team
 source:
   github:
     repo: tgoai/tgo-plugin-go
-    path: 
+    path: .
 build:
   language: go
   go:
