@@ -6,11 +6,11 @@ author: TGO Team
 source:
   github:
     repo: tgoai/tgo-plugin-go
-    path: examples/ticket
+    path: 
 build:
   language: go
   go:
-    main: ./main.go
+    main: ./examples/ticket/main.go
     output: ticket-plugin
 runtime:
   auto_restart: true
