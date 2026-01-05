@@ -1,0 +1,17 @@
+id: com.tgo.ticket.go
+name: ticket-management-go
+version: 1.0.0
+description: Ticket Management Plugin with MCP Tools (Go Version)
+author: TGO Team
+source:
+  github:
+    repo: tgoai/tgo-plugin-go
+    path: examples/ticket
+build:
+  language: go
+  go:
+    main: ./main.go
+    output: ticket-plugin
+runtime:
+  auto_restart: true
+

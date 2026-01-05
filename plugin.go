@@ -36,11 +36,15 @@ type SidebarIframeConfigurator interface {
 type ChannelIntegrationManifestProvider interface {
 	OnChannelIntegrationManifest(params map[string]any) any
 }
+type ToolHandler interface {
+	OnToolExecute(ctx *ToolContext, toolName string, args map[string]any) (*ToolResult, error)
+}
 
 // Options for running a plugin.
 type Options struct {
 	SocketPath string
 	TCPAddr    string
+	DevToken   string
 }
 
 type Option func(*Options)
@@ -51,6 +55,10 @@ func WithSocketPath(path string) Option {
 
 func WithTCPAddr(addr string) Option {
 	return func(o *Options) { o.TCPAddr = addr }
+}
+
+func WithDevToken(token string) Option {
+	return func(o *Options) { o.DevToken = token }
 }
 
 // Run starts the plugin and handles communication with TGO.
@@ -79,7 +87,7 @@ func Run(p Plugin, opts ...Option) error {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Register the plugin
-	if err := register(p, transport); err != nil {
+	if err := register(p, transport, options.DevToken); err != nil {
 		return fmt.Errorf("registration failed: %w", err)
 	}
 
@@ -109,7 +117,7 @@ func Run(p Plugin, opts ...Option) error {
 	}
 }
 
-func register(p Plugin, t *Transport) error {
+func register(p Plugin, t *Transport, devToken string) error {
 	req := map[string]any{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -119,6 +127,7 @@ func register(p Plugin, t *Transport) error {
 			"name":         p.Name(),
 			"version":      p.Version(),
 			"capabilities": p.Capabilities(),
+			"dev_token":    devToken,
 		},
 	}
 
@@ -201,6 +210,14 @@ func handleRequest(p Plugin, t *Transport, msg map[string]any) {
 	case "channel_integration/manifest":
 		if h, ok := p.(ChannelIntegrationManifestProvider); ok {
 			result = h.OnChannelIntegrationManifest(params)
+		}
+	case "tool/execute":
+		if h, ok := p.(ToolHandler); ok {
+			ctx := &ToolContext{}
+			mapToStruct(params, ctx)
+			toolName, _ := params["tool_name"].(string)
+			args, _ := params["arguments"].(map[string]any)
+			result, err = h.OnToolExecute(ctx, toolName, args)
 		}
 	default:
 		err = fmt.Errorf("method not found: %s", method)

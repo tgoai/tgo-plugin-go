@@ -87,7 +87,10 @@ func (t *Table) ToMap() map[string]any {
 // Text template
 type Text struct {
 	Text     string `json:"text"`
-	Type     string `json:"type,omitempty"`
+	Type     string `json:"type,omitempty"` // success, warning, error, info
+	Size     string `json:"size,omitempty"` // sm, base (default), lg, xl
+	Bold     bool   `json:"bold,omitempty"`
+	Color    string `json:"color,omitempty"`
 	Copyable bool   `json:"copyable,omitempty"`
 }
 
@@ -97,6 +100,21 @@ func NewText(text string) *Text {
 
 func (t *Text) SetType(tp string) *Text {
 	t.Type = tp
+	return t
+}
+
+func (t *Text) SetSize(s string) *Text {
+	t.Size = s
+	return t
+}
+
+func (t *Text) SetBold(b bool) *Text {
+	t.Bold = b
+	return t
+}
+
+func (t *Text) SetColor(c string) *Text {
+	t.Color = c
 	return t
 }
 
@@ -178,6 +196,12 @@ func NewForm(title string) *Form {
 	return &Form{Title: title, Fields: []map[string]any{}}
 }
 
+func (f *Form) Add(field *FormField) *Form {
+	f.Fields = append(f.Fields, field.ToMap())
+	return f
+}
+
+// Deprecated: Use Add(NewFormField(...)) instead
 func (f *Form) AddField(name, label, tp string, required bool, opts ...FormFieldOption) *Form {
 	field := map[string]any{
 		"name":     name,
@@ -191,6 +215,9 @@ func (f *Form) AddField(name, label, tp string, required bool, opts ...FormField
 	f.Fields = append(f.Fields, field)
 	return f
 }
+
+func (f *Form) SetSubmitText(t string) *Form { f.SubmitText = t; return f }
+func (f *Form) SetCancelText(t string) *Form { f.CancelText = t; return f }
 
 func (f *Form) ToMap() map[string]any {
 	return map[string]any{
@@ -211,6 +238,47 @@ func FormOptions(opts []map[string]any) FormFieldOption {
 
 func FormDefault(d any) FormFieldOption {
 	return func(m map[string]any) { m["default"] = d }
+}
+
+type FormField struct {
+	Name         string           `json:"name"`
+	Label        string           `json:"label"`
+	Type         string           `json:"type"` // text, textarea, select, checkbox, radio, date
+	Placeholder  string           `json:"placeholder,omitempty"`
+	Required     bool             `json:"required,omitempty"`
+	DefaultValue any              `json:"default,omitempty"`
+	Options      []map[string]any `json:"options,omitempty"`
+}
+
+func NewFormField(name, label, tp string) *FormField {
+	return &FormField{Name: name, Label: label, Type: tp}
+}
+
+func (ff *FormField) SetPlaceholder(p string) *FormField { ff.Placeholder = p; return ff }
+func (ff *FormField) SetRequired(r bool) *FormField { ff.Required = r; return ff }
+func (ff *FormField) SetDefault(d any) *FormField { ff.DefaultValue = d; return ff }
+func (ff *FormField) AddOption(label string, value any) *FormField {
+	ff.Options = append(ff.Options, map[string]any{"label": label, "value": value})
+	return ff
+}
+
+func (ff *FormField) ToMap() map[string]any {
+	m := map[string]any{
+		"name":     ff.Name,
+		"label":    ff.Label,
+		"type":     ff.Type,
+		"required": ff.Required,
+	}
+	if ff.Placeholder != "" {
+		m["placeholder"] = ff.Placeholder
+	}
+	if ff.DefaultValue != nil {
+		m["default"] = ff.DefaultValue
+	}
+	if len(ff.Options) > 0 {
+		m["options"] = ff.Options
+	}
+	return m
 }
 
 // Button (Action) template

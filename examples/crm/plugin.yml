@@ -1,0 +1,17 @@
+id: com.tgo.crm.go
+name: crm-info-go
+version: 1.0.0
+description: CRM Customer Information Plugin (Go Version)
+author: TGO Team
+source:
+  github:
+    repo: tgoai/tgo-plugin-go
+    path: examples/crm
+build:
+  language: go
+  go:
+    main: ./main.go
+    output: crm-plugin
+runtime:
+  auto_restart: true
+
