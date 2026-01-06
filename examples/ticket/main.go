@@ -115,6 +115,7 @@ func (p *TicketPlugin) OnChatToolbarRender(ctx *tgo.RenderContext) tgo.Template 
 // --- Event Handling (Buttons/Forms) ---
 
 func (p *TicketPlugin) OnVisitorPanelEvent(ctx *tgo.EventContext) *tgo.Action {
+	fmt.Println("OnVisitorPanelEvent", ctx.EventType, ctx.ActionID, ctx.VisitorID, ctx.SessionID)
 	return p.handleCommonEvents(ctx)
 }
 
@@ -137,7 +138,7 @@ func (p *TicketPlugin) handleCommonEvents(ctx *tgo.EventContext) *tgo.Action {
 
 		return tgo.ShowModal("新建工单", form)
 
-	case "submit_ticket":
+	case "submit":
 		// Handle form submission
 		title, _ := ctx.FormData["title"].(string)
 		priority, _ := ctx.FormData["priority"].(string)
