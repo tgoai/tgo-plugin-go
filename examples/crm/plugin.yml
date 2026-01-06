@@ -6,11 +6,11 @@ author: TGO Team
 source:
   github:
     repo: tgoai/tgo-plugin-go
-    path: examples/crm
+    path: ./
 build:
   language: go
   go:
-    main: ./main.go
+    main: ./examples/crm/main.go
     output: crm-plugin
 runtime:
   auto_restart: true
