@@ -4,12 +4,46 @@ package tgo
 type Action struct {
 	Type string         `json:"action"`
 	Data map[string]any `json:"data,omitempty"`
+	next *Action        // Private, used for chaining
+}
+
+// Then adds another action to be executed after this one.
+func (a *Action) Then(next *Action) *Action {
+	if a == nil || next == nil {
+		return a
+	}
+	if a.next == nil {
+		a.next = next
+	} else {
+		a.next.Then(next)
+	}
+	return a
 }
 
 func (a *Action) ToMap() map[string]any {
+	if a.next == nil {
+		return map[string]any{
+			"action": a.Type,
+			"data":   a.Data,
+		}
+	}
+
+	// Chained actions, convert to batch
+	actions := []map[string]any{
+		{"action": a.Type, "data": a.Data},
+	}
+	for curr := a.next; curr != nil; curr = curr.next {
+		actions = append(actions, map[string]any{
+			"action": curr.Type,
+			"data":   curr.Data,
+		})
+	}
+
 	return map[string]any{
-		"action": a.Type,
-		"data":   a.Data,
+		"action": "batch",
+		"data": map[string]any{
+			"actions": actions,
+		},
 	}
 }
 

@@ -286,16 +286,22 @@ type Button struct {
 	Label    string `json:"label"`
 	ActionID string `json:"action_id"`
 	Type     string `json:"type,omitempty"` // primary, secondary, danger, link
+	Size     string `json:"size,omitempty"` // xs, sm, md, lg
 	Icon     string `json:"icon,omitempty"`
 	Disabled bool   `json:"disabled,omitempty"`
 }
 
 func NewButton(label, actionID string) *Button {
-	return &Button{Label: label, ActionID: actionID, Type: "primary"}
+	return &Button{Label: label, ActionID: actionID, Type: "primary", Size: "md"}
 }
 
 func (b *Button) SetType(t string) *Button {
 	b.Type = t
+	return b
+}
+
+func (b *Button) SetSize(s string) *Button {
+	b.Size = s
 	return b
 }
 

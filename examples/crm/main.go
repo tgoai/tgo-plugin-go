@@ -120,7 +120,7 @@ func main() {
 	plugin := &CRMPlugin{}
 	// On macOS, Unix socket bind mounts from Docker are not accessible from host.
 	// Use TCP port 8005 for local debugging.
-	if err := tgo.Run(plugin, tgo.WithTCPAddr("localhost:8005")); err != nil {
+	if err := tgo.Run(plugin); err != nil {
 		log.Fatalf("Plugin exited: %v", err)
 	}
 }

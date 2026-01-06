@@ -69,7 +69,7 @@ func (p *TicketPlugin) OnVisitorPanelRender(ctx *tgo.RenderContext) tgo.Template
 	// Title and Action Button
 	header := tgo.NewGroup().SetHorizontal().
 		Add(tgo.NewText("访客工单记录").SetSize("lg").SetBold(true)).
-		Add(tgo.NewButton("手动创建", "open_create_form").SetIcon("plus").SetType("primary"))
+		Add(tgo.NewButton("手动创建", "open_create_form").SetIcon("plus").SetType("primary").SetSize("sm"))
 	group.Add(header)
 
 	if len(tickets) == 0 {
@@ -153,7 +153,9 @@ func (p *TicketPlugin) handleCommonEvents(ctx *tgo.EventContext) *tgo.Action {
 			CreatedAt: time.Now(),
 		})
 
-		return tgo.ShowToast(fmt.Sprintf("工单 %s 创建成功", newID), "success")
+		return tgo.ShowToast(fmt.Sprintf("工单 %s 创建成功", newID), "success").
+			Then(tgo.CloseModal()).
+			Then(tgo.Refresh())
 	}
 
 	return tgo.Noop()
@@ -163,7 +165,6 @@ func (p *TicketPlugin) handleCommonEvents(ctx *tgo.EventContext) *tgo.Action {
 
 func (p *TicketPlugin) OnToolExecute(ctx *tgo.ToolContext, toolName string, args map[string]any) (*tgo.ToolResult, error) {
 	log.Printf("MCP Tool Execute: %s (Visitor: %s)", toolName, ctx.VisitorID)
-	fmt.Println("MCP Tool Execute: %s (Visitor: %s)", toolName, ctx.VisitorID)
 
 	switch toolName {
 	case "create_ticket":
@@ -216,7 +217,7 @@ func (p *TicketPlugin) OnToolExecute(ctx *tgo.ToolContext, toolName string, args
 func main() {
 	// Start the plugin, connecting to the TGO API via TCP
 	// Use 8005 for local debugging with Docker-based TGO API
-	if err := tgo.Run(&TicketPlugin{}, tgo.WithTCPAddr("localhost:8005"), tgo.WithDevToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0X2lkIjoiOTI2MGEwODMtYWI3YS00MGU5LWI4MDQtNzUzMjhjMjFlZDNhIiwidXNlcl9pZCI6IjQ4NTQ2YmU2LTc2NTQtNDU4NS05MmEwLTMwMjNlY2MyYjZlMyIsInR5cGUiOiJwbHVnaW5fZGV2IiwiZXhwIjoxNzY3NjkwNzM0fQ.2ULd2ztlGO517zRkz2c-EWrPNXgH332Gb4dwbQYqJUY")); err != nil {
+	if err := tgo.Run(&TicketPlugin{}); err != nil {
 		log.Fatalf("Ticket Plugin failed: %v", err)
 	}
 }
